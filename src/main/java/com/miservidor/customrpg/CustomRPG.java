@@ -14,13 +14,15 @@ public class CustomRPG extends JavaPlugin {
     public void onEnable() {
         instance = this;
         saveDefaultConfig();
-
+        
         // Registrar Eventos (Listeners)
         getServer().getPluginManager().registerEvents(new CombatListener(), this);
         getServer().getPluginManager().registerEvents(new ArmorListener(), this);
         getServer().getPluginManager().registerEvents(new SafeDropListener(), this);
-
+        getServer().getPluginManager().registerEvents(new BossManager(), this); // <- Esta línea es crucial
+        
         getLogger().info(ChatColor.GREEN + "CustomRPG v1.0.0 cargado exitosamente en Purpur 26.3");
+    }
     }
 
     @Override
