@@ -8,7 +8,6 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Giant;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -26,16 +25,11 @@ public class BossManager implements Listener {
     private static final Map<UUID, BossBar> activeBossBars = new HashMap<>();
 
     public static void spawnTitanZombie(Location loc) {
+        if (loc == null || loc.getWorld() == null) return;
         Giant titan = loc.getWorld().spawn(loc, Giant.class);
         
         titan.setCustomName(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral");
         titan.setCustomNameVisible(true);
-        
-        if (titan instanceof Mob mob) {
-            mob.setAI(true);
-        }
-
-        // Vida inicial segura y estable
         titan.setHealth(100.0);
 
         // Equipamiento visual del jefe
