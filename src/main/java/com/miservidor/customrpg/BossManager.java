@@ -32,9 +32,9 @@ public class BossManager implements Listener {
         titan.setCustomNameVisible(true);
         titan.setAI(true);
 
-        // Vida máxima y actual
-        if (titan.getAttribute(Attribute.MAX_HEALTH) != null) {
-            titan.getAttribute(Attribute.MAX_HEALTH).setBaseValue(6000.0);
+        // Vida máxima y actual corregida para Purpur moderno
+        if (titan.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null) {
+            titan.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(6000.0);
         }
         titan.setHealth(6000.0);
 
@@ -56,7 +56,7 @@ public class BossManager implements Listener {
         UUID bossId = titan.getUniqueId();
         activeBossBars.put(bossId, bossBar);
 
-        // Tarea repetitiva: Revisa cada 1 segundo (20 ticks) los jugadores a menos de 100 bloques
+        // Tarea repetitiva: Muestra la barra solo a jugadores a menos de 100 bloques
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -67,19 +67,17 @@ public class BossManager implements Listener {
                     return;
                 }
 
-                double radiusSquared = 100.0 * 100.0; // 100 bloques de distancia
+                double radiusSquared = 100.0 * 100.0;
                 Location bossLoc = titan.getLocation();
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     if (player.getWorld().equals(bossLoc.getWorld()) && 
                         player.getLocation().distanceSquared(bossLoc) <= radiusSquared) {
                         
-                        // Si está a menos de 100 bloques y no tiene la barra, se la muestra
                         if (!bossBar.getPlayers().contains(player)) {
                             bossBar.addPlayer(player);
                         }
                     } else {
-                        // Si se aleja a más de 100 bloques, se le quita la barra
                         if (bossBar.getPlayers().contains(player)) {
                             bossBar.removePlayer(player);
                         }
@@ -89,15 +87,14 @@ public class BossManager implements Listener {
         }.runTaskTimer(CustomRPG.getInstance(), 0L, 20L);
     }
 
-    // Actualiza la barra y el texto de vida al recibir daño
     @EventHandler
     public void onBossDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Giant giant) {
             UUID id = giant.getUniqueId();
             if (activeBossBars.containsKey(id)) {
                 BossBar bar = activeBossBars.get(id);
-                double maxHp = giant.getAttribute(Attribute.MAX_HEALTH) != null ? 
-                        giant.getAttribute(Attribute.MAX_HEALTH).getValue() : 6000.0;
+                double maxHp = giant.getAttribute(Attribute.GENERIC_MAX_HEALTH) != null ? 
+                        giant.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue() : 6000.0;
                 double currentHp = Math.max(0, giant.getHealth() - event.getFinalDamage());
                 
                 bar.setTitle(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral " + 
@@ -108,7 +105,6 @@ public class BossManager implements Listener {
         }
     }
 
-    // Elimina la barra cuando el jefe muere
     @EventHandler
     public void onBossDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Giant giant) {
