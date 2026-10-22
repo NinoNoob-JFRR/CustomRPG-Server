@@ -30,7 +30,6 @@ public class BossManager implements Listener {
         
         titan.setCustomName(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral");
         titan.setCustomNameVisible(true);
-        titan.setHealth(100.0);
 
         // Equipamiento visual del jefe
         if (titan.getEquipment() != null) {
@@ -41,7 +40,7 @@ public class BossManager implements Listener {
 
         // Crear BossBar en pantalla
         BossBar bossBar = Bukkit.createBossBar(
-            ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral " + ChatColor.GRAY + "[100 / 100 HP]", 
+            ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral", 
             BarColor.GREEN, 
             BarStyle.SOLID
         );
@@ -50,7 +49,7 @@ public class BossManager implements Listener {
         UUID bossId = titan.getUniqueId();
         activeBossBars.put(bossId, bossBar);
 
-        // Tarea repetitiva: Muestra la barra solo a jugadores a menos de 100 bloques
+        // Tarea repetitiva: Muestra la barra solo a jugadores a menos de 100 bloques (100^2 = 10000)
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -61,7 +60,7 @@ public class BossManager implements Listener {
                     return;
                 }
 
-                double radiusSquared = 100.0 * 100.0; // 100 bloques de radio
+                double radiusSquared = 100.0 * 100.0;
                 Location bossLoc = titan.getLocation();
 
                 for (Player player : Bukkit.getOnlinePlayers()) {
@@ -86,11 +85,8 @@ public class BossManager implements Listener {
             UUID id = giant.getUniqueId();
             if (activeBossBars.containsKey(id)) {
                 BossBar bar = activeBossBars.get(id);
-                double maxHp = 100.0;
+                double maxHp = giant.getMaxHealth();
                 double currentHp = Math.max(0, giant.getHealth() - event.getFinalDamage());
-                
-                bar.setTitle(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral " + 
-                        ChatColor.RED + "[" + (int) currentHp + " / " + (int) maxHp + " HP]");
                 
                 bar.setProgress(Math.max(0.0, Math.min(1.0, currentHp / maxHp)));
             }
