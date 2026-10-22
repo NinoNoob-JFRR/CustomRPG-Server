@@ -15,6 +15,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,22 +30,22 @@ public class BossManager implements Listener {
         
         titan.setCustomName(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral");
         titan.setCustomNameVisible(true);
-        titan.setAI(true); // Activa la Inteligencia Artificial para que se mueva y ataque
+        titan.setAI(true);
 
-        // Vida máxima y actual de 6000 HP
+        // Vida máxima y actual
         if (titan.getAttribute(Attribute.MAX_HEALTH) != null) {
             titan.getAttribute(Attribute.MAX_HEALTH).setBaseValue(6000.0);
         }
         titan.setHealth(6000.0);
 
-        // Equipamiento del Gigante
+        // Equipamiento
         if (titan.getEquipment() != null) {
             titan.getEquipment().setHelmet(new ItemStack(Material.NETHERITE_HELMET));
             titan.getEquipment().setChestplate(new ItemStack(Material.NETHERITE_CHESTPLATE));
             titan.getEquipment().setItemInMainHand(new ItemStack(Material.NETHERITE_SWORD));
         }
 
-        // Crear la BossBar en pantalla
+        // Crear BossBar
         BossBar bossBar = Bukkit.createBossBar(
             ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral " + ChatColor.GRAY + "[6000 / 6000 HP]", 
             BarColor.GREEN, 
@@ -52,16 +53,43 @@ public class BossManager implements Listener {
         );
         bossBar.setProgress(1.0);
 
-        // Hace que la barra aparezca en la pantalla de todos los jugadores conectados
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            bossBar.addPlayer(p);
-        }
+        UUID bossId = titan.getUniqueId();
+        activeBossBars.put(bossId, bossBar);
 
-        // Guarda la barra asociada a la UUID única del jefe
-        activeBossBars.put(titan.getUniqueId(), bossBar);
+        // Tarea repetitiva: Revisa cada 1 segundo (20 ticks) los jugadores a menos de 100 bloques
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (titan.isDead() || !titan.isValid()) {
+                    bossBar.removeAll();
+                    activeBossBars.remove(bossId);
+                    this.cancel();
+                    return;
+                }
+
+                double radiusSquared = 100.0 * 100.0; // 100 bloques de distancia
+                Location bossLoc = titan.getLocation();
+
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (player.getWorld().equals(bossLoc.getWorld()) && 
+                        player.getLocation().distanceSquared(bossLoc) <= radiusSquared) {
+                        
+                        // Si está a menos de 100 bloques y no tiene la barra, se la muestra
+                        if (!bossBar.getPlayers().contains(player)) {
+                            bossBar.addPlayer(player);
+                        }
+                    } else {
+                        // Si se aleja a más de 100 bloques, se le quita la barra
+                        if (bossBar.getPlayers().contains(player)) {
+                            bossBar.removePlayer(player);
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(CustomRPG.getInstance(), 0L, 20L);
     }
 
-    // Evento que actualiza el texto y la barra de vida cuando recibe un golpe
+    // Actualiza la barra y el texto de vida al recibir daño
     @EventHandler
     public void onBossDamage(EntityDamageEvent event) {
         if (event.getEntity() instanceof Giant giant) {
@@ -72,24 +100,22 @@ public class BossManager implements Listener {
                         giant.getAttribute(Attribute.MAX_HEALTH).getValue() : 6000.0;
                 double currentHp = Math.max(0, giant.getHealth() - event.getFinalDamage());
                 
-                // Actualiza el texto con la vida numérica exacta
                 bar.setTitle(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "Titán Zombie Ancestral " + 
                         ChatColor.RED + "[" + (int) currentHp + " / " + (int) maxHp + " HP]");
                 
-                // Actualiza el porcentaje visual de la barra de color
                 bar.setProgress(Math.max(0.0, Math.min(1.0, currentHp / maxHp)));
             }
         }
     }
 
-    // Evento que elimina la barra de la pantalla cuando el jefe muere
+    // Elimina la barra cuando el jefe muere
     @EventHandler
     public void onBossDeath(EntityDeathEvent event) {
         if (event.getEntity() instanceof Giant giant) {
             UUID id = giant.getUniqueId();
             if (activeBossBars.containsKey(id)) {
                 BossBar bar = activeBossBars.remove(id);
-                bar.removeAll(); // Borra la barra de la pantalla de todos
+                bar.removeAll();
             }
         }
     }
