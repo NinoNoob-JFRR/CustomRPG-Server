@@ -1,0 +1,12 @@
+name: CustomRPG
+version: 1.0.0
+main: com.miservidor.customrpg.CustomRPG
+api-version: '1.21'
+author: NinoNoob
+description: Plugin Todo en Uno de Esencias, Bosses y Drops para 26.3
+
+commands:
+  customrpg:
+    description: Comando principal del plugin
+    permission: customrpg.admin
+    usage: /customrpg [reload|spawn|give]
