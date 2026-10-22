@@ -1,0 +1,76 @@
+# ======================================================
+# CONFIGURACIÓN GENERAL DE CUSTOMRPG
+# ======================================================
+
+settings:
+  prefix: "&8[&cCustomRPG&8] "
+
+# ------------------------------------------------------
+# SEGURIDAD DE DROPS (AuraSkills / Luck Protection)
+# ------------------------------------------------------
+safe-drops:
+  enabled: true
+  max-stack-size: 64
+
+# ------------------------------------------------------
+# MÓDULO DE COMBATE Y ESENCIAS
+# ------------------------------------------------------
+combat:
+  backstab:
+    enabled: true
+    max-level: 8
+    # Costo al activar (food = puntos de hambre, health = vida)
+    cost-type: "food" 
+    cost-amount-base: 1.0
+    cost-amount-per-level: 0.5
+    
+    # Multiplicador de daño
+    base-multiplier: 2.5
+    multiplier-per-level: 0.5
+    
+    min-angle-dot: 0.8
+    message: "&c&l¡BACKSTAB! &7Daño crítico x%multiplier% aplicado."
+
+  vampirism:
+    enabled: true
+    max-level: 5
+    cost-type: "none" # "none", "food", "health"
+    cost-amount-base: 0.0
+    cost-amount-per-level: 0.0
+    
+    # Porcentaje de curación (0.15 = 15%)
+    base-heal-percentage: 0.15
+    heal-percentage-per-level: 0.05
+    show-particles: true
+
+  lightning:
+    enabled: true
+    max-level: 8
+    cost-type: "food"
+    cost-amount-base: 1.0
+    cost-amount-per-level: 0.0
+    
+    # Probabilidad y Daño
+    base-chance: 0.10      # 10% base
+    chance-per-level: 0.02 # +2% por nivel
+    base-damage: 5.0
+    damage-per-level: 2.0
+
+# ------------------------------------------------------
+# MÓDULO DE ARMADURA Y HABILIDADES
+# ------------------------------------------------------
+abilities:
+  hardy:
+    enabled: true
+    max-level: 8
+    # Nivel 1 = 2 corazones (Absorción I), Nivel 2 = 4 corazones, etc.
+    hearts-per-level: 2
+
+  double-jump:
+    enabled: true
+    max-level: 3
+    cost-type: "food"
+    cost-amount-base: 2.0
+    cost-amount-per-level: 0.0
+    velocity-multiplier: 1.5
+    height-multiplier: 1.0
